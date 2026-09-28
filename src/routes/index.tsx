@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
+import AutoScroll from "embla-carousel-auto-scroll";
 import { ArrowLeft, ArrowRight, Check, ChevronDown, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import mockup from "@/assets/mockup-producto.webp.asset.json";
@@ -11,6 +12,10 @@ import page4 from "@/assets/exercicio-14-plancha-lateral.webp.asset.json";
 import page5 from "@/assets/exercicio-15-russian-twist.webp.asset.json";
 import page6 from "@/assets/habitos-diarios.webp.asset.json";
 import page7 from "@/assets/apelo-final.webp.asset.json";
+import bonusBand from "@/assets/bonus-banda-elastica.jpg";
+import bonusYoga from "@/assets/bonus-yoga-facial.jpg";
+import bonusWeekly from "@/assets/bonus-acompanamiento-semanal.jpg";
+import bonusWhatsapp from "@/assets/bonus-whatsapp.jpg";
 
 const CHECKOUT = {
   essential: "https://pay.hotmart.com/Y106555914B?off=fh9947dk&checkoutMode=10",
@@ -29,6 +34,12 @@ const pages = [
 const essentials = ["Ebook principal", "Soporte por email", "Garantía de 7 días"];
 const premium = ["Ebook principal", "Soporte por email", "Soporte por WhatsApp", "Atención personalizada por WhatsApp", "Acompañamiento semanal", "50 ejercicios con banda elástica", "Yoga facial", "Garantía de 60 días"];
 const excluded = ["Soporte por WhatsApp", "Atención personalizada por WhatsApp", "Acompañamiento semanal", "50 ejercicios con banda elástica", "Yoga facial", "Garantía de 60 días"];
+const bonuses = [
+  { title: "50 ejercicios con banda elástica", text: "Una colección adicional de ejercicios para complementar tu rutina.", value: "US$40", image: bonusBand, alt: "Mujer realizando ejercicios con una banda elástica" },
+  { title: "Yoga facial", text: "Rutinas adicionales enfocadas en el cuidado y bienestar facial.", value: "US$27", image: bonusYoga, alt: "Mujer practicando una rutina de yoga facial" },
+  { title: "Acompañamiento semanal", text: "Orientación semanal para ayudarte a organizar tu proceso.", value: "US$140", image: bonusWeekly, alt: "Mujer organizando su rutina durante un acompañamiento semanal" },
+  { title: "Atención personalizada por WhatsApp", text: "Un canal adicional para recibir orientación durante tu proceso.", value: "US$98", image: bonusWhatsapp, alt: "Mujer recibiendo atención personalizada por mensajería" },
+];
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
@@ -44,26 +55,52 @@ export const Route = createFileRoute("/")({
 });
 
 function PlanLink({ children, href, onClick, outline = false }: { children: React.ReactNode; href?: string; onClick?: () => void; outline?: boolean }) {
-  return <Button asChild={Boolean(href)} onClick={onClick} variant={outline ? "outline" : "default"} className="w-full min-h-12 h-auto py-3 px-4 text-center whitespace-normal leading-snug font-bold text-sm tracking-normal shadow-none rounded-md hover:shadow-none">
-    {href ? <a href={href}>{children}</a> : <span>{children}</span>}
+  return <Button asChild={Boolean(href)} onClick={onClick} variant={outline ? "outline" : "default"} className="purchase-pulse w-full min-h-12 h-auto py-3 px-4 text-center whitespace-normal leading-snug font-bold text-sm tracking-normal shadow-none rounded-md hover:shadow-none">
+    {href ? <a href={href} rel="noopener noreferrer">{children}</a> : <span>{children}</span>}
   </Button>;
 }
 
+function CountdownBar() {
+  const [seconds, setSeconds] = useState(15 * 60);
+  const [atTop, setAtTop] = useState(true);
+
+  useEffect(() => {
+    const tick = window.setInterval(() => setSeconds((current) => current > 0 ? current - 1 : 0), 1000);
+    const updateVisibility = () => setAtTop(window.scrollY <= 2);
+    updateVisibility();
+    window.addEventListener("scroll", updateVisibility, { passive: true });
+    return () => {
+      window.clearInterval(tick);
+      window.removeEventListener("scroll", updateVisibility);
+    };
+  }, []);
+
+  if (!atTop) return null;
+  const minutes = Math.floor(seconds / 60).toString().padStart(2, "0");
+  const remainingSeconds = (seconds % 60).toString().padStart(2, "0");
+  return <div className="countdown-bar" role="timer" aria-live="off">
+    <span>OFERTA ESPECIAL TERMINA EN</span>
+    <strong>{minutes}:{remainingSeconds}</strong>
+  </div>;
+}
+
 function PageCarousel() {
-  const [viewportRef, embla] = useEmblaCarousel({ loop: true, align: "start", dragFree: false });
+  const autoScroll = useRef(AutoScroll({ playOnInit: false, speed: 0.75, stopOnInteraction: false, stopOnMouseEnter: false }));
+  const [viewportRef, embla] = useEmblaCarousel({ loop: true, align: "start", dragFree: true }, [autoScroll.current]);
   const [selected, setSelected] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const update = useCallback(() => { if (embla) setSelected(embla.selectedScrollSnap()); }, [embla]);
   useEffect(() => { if (!embla) return; update(); embla.on("select", update); embla.on("reInit", update); return () => { embla.off("select", update); embla.off("reInit", update); }; }, [embla, update]);
   useEffect(() => {
-    if (!embla || paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    timer.current = setInterval(() => embla.scrollNext(), 3800);
-    return () => { if (timer.current) clearInterval(timer.current); };
-  }, [embla, paused]);
-  return <div className="carousel" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocusCapture={() => setPaused(true)} onBlurCapture={() => setPaused(false)}>
-    <div className="carousel-top"><div><p className="eyebrow">UN VISTAZO AL INTERIOR</p><h3>Así se ve tu guía</h3></div><div className="carousel-controls"><Button variant="outline" size="icon" aria-label="Página anterior" onClick={() => embla?.scrollPrev()}><ArrowLeft /></Button><Button variant="outline" size="icon" aria-label="Página siguiente" onClick={() => embla?.scrollNext()}><ArrowRight /></Button></div></div>
-    <div className="carousel-viewport" ref={viewportRef}><div className="carousel-track">{pages.map((page) => <div className="carousel-slide" key={page.src}><img src={page.src} alt={page.alt} loading="lazy" draggable="false" /></div>)}</div></div>
+    if (!embla || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    embla.plugins().autoScroll?.play();
+  }, [embla]);
+  return <div className="carousel">
+    <div className="carousel-top"><p className="eyebrow">UN VISTAZO AL INTERIOR</p><h3>Así se ve tu guía</h3></div>
+    <div className="carousel-stage">
+      <Button className="carousel-arrow carousel-arrow-prev" variant="outline" size="icon" aria-label="Página anterior" onClick={() => embla?.scrollPrev()}><ArrowLeft /></Button>
+      <div className="carousel-viewport" ref={viewportRef}><div className="carousel-track">{pages.map((page) => <div className="carousel-slide" key={page.src}><img src={page.src} alt={page.alt} loading="lazy" draggable="false" /></div>)}</div></div>
+      <Button className="carousel-arrow carousel-arrow-next" variant="outline" size="icon" aria-label="Página siguiente" onClick={() => embla?.scrollNext()}><ArrowRight /></Button>
+    </div>
     <div className="carousel-dots" aria-label="Navegación de páginas">{pages.map((page, i) => <Button key={page.src} variant="ghost" size="icon" aria-label={`Ver página ${i + 1}`} aria-current={selected === i ? "true" : undefined} className={selected === i ? "active" : ""} onClick={() => embla?.scrollTo(i)}><span /></Button>)}</div>
   </div>;
 }
@@ -79,6 +116,7 @@ function Index() {
     return () => { document.removeEventListener("keydown", close); document.body.style.overflow = oldOverflow; };
   }, [offerOpen]);
   return <main>
+    <CountdownBar />
     <header className="site-header"><a className="wordmark" href="#inicio" aria-label="Olivia Grace, inicio"><span className="brand-mark">OG</span><span>OLIVIA GRACE</span></a><a className="header-link" href="#planes">Ver planes <ArrowRight size={16}/></a></header>
     <section className="hero" id="inicio"><div className="hero-inner">
       <div className="hero-copy"><p className="eyebrow">UNA GUÍA PARA VOLVER A TI</p><h1>¿Tu busto cambió después de la <em>lactancia?</em></h1><p className="hero-sub">Una guía práctica para ayudarte a organizar ejercicios, cuidados y hábitos de bienestar después de la lactancia.</p></div>
@@ -94,16 +132,11 @@ function Index() {
 
     <section className="section benefits"><div className="container"><p className="eyebrow">PASO A PASO</p><h2>Haz que tu rutina sea más sencilla</h2><div className="benefit-grid">{["Sabes por dónde empezar.", "Encuentras ejercicios y cuidados en un solo lugar.", "Puedes organizar tu rutina semanal.", "Avanzas poco a poco y a tu ritmo."].map((x, i) => <div key={x}><span>0{i+1}</span><p>{x}</p></div>)}</div></div></section>
 
-    <section className="section bonuses"><div className="container"><p className="eyebrow">UN POCO MÁS PARA TI</p><h2>Con Premium recibes más</h2><div className="bonus-grid">{[
-      ["50 ejercicios con banda elástica", "Una colección adicional de ejercicios para complementar tu rutina."],
-      ["Yoga facial", "Rutinas adicionales enfocadas en el cuidado y bienestar facial."],
-      ["Acompañamiento semanal", "Si tienes dudas durante el proceso, podrás solicitar orientación personalizada."],
-      ["Atención personalizada por WhatsApp", "Un canal adicional para recibir orientación durante tu proceso."],
-    ].map(([title, text]) => <div className="bonus" key={title}><span aria-hidden="true">✦</span><div><h3>{title}</h3><p>{text}</p></div></div>)}</div></div></section>
+    <section className="section bonuses"><div className="container"><p className="eyebrow">UN POCO MÁS PARA TI</p><h2>BONUS ESPECIALES QUE VAS A RECIBIR</h2><div className="bonus-grid">{bonuses.map((bonus) => <article className="bonus" key={bonus.title}><img src={bonus.image} alt={bonus.alt} loading="lazy" width={1024} height={768} /><div className="bonus-body"><h3>{bonus.title}</h3><p>{bonus.text}</p><p className="bonus-value"><s>{bonus.value}</s><strong>GRATIS</strong></p></div></article>)}</div></div></section>
 
     <section className="section plans" id="planes"><div className="container"><div className="plans-heading"><p className="eyebrow">ELIGE TU PLAN</p><h2>Empieza a cuidarte a tu manera</h2><p className="section-lead">Elige la opción que mejor se adapta a lo que necesitas hoy.</p></div><div className="plans-grid">
-      <article className="plan-card"><div className="plan-title"><h3>Plan Esencial</h3><p>La guía para empezar a tu ritmo.</p></div><div className="price"><small>US$</small>9,90</div><ul className="plan-list">{essentials.map(x => <li key={x}><Check size={17}/>{x}</li>)}{excluded.map(x => <li className="excluded" key={x}><X size={16}/><s>{x}</s></li>)}</ul><Button className="plan-button" onClick={() => setOfferOpen(true)}>QUIERO EL ESENCIAL <ArrowRight size={17}/></Button></article>
-      <article className="plan-card premium-plan"><div className="plan-title"><span className="badge">MÁS COMPLETO</span><h3>Plan Premium</h3><p>Más recursos y acompañamiento.</p></div><div className="price"><small>US$</small>27,90</div><ul className="plan-list">{premium.map(x => <li key={x}><Check size={17}/>{x}</li>)}</ul><p className="plan-note">Si tienes dudas durante el proceso, podrás solicitar orientación personalizada por WhatsApp.</p><Button asChild className="plan-button"><a href={CHECKOUT.premium}>QUIERO EL PREMIUM <ArrowRight size={17}/></a></Button></article>
+      <article className="plan-card"><div className="plan-title"><h3>Plan Esencial</h3><p>La guía para empezar a tu ritmo.</p></div><div className="price"><small>US$</small>9,90</div><ul className="plan-list">{essentials.map(x => <li key={x}><Check size={17}/>{x}</li>)}{excluded.map(x => <li className="excluded" key={x}><X size={16}/><s>{x}</s></li>)}</ul><Button className="plan-button purchase-pulse" onClick={() => setOfferOpen(true)}>QUIERO EL ESENCIAL <ArrowRight size={17}/></Button></article>
+      <article className="plan-card premium-plan"><div className="plan-title"><span className="badge">MÁS COMPLETO</span><h3>Plan Premium</h3><p>Más recursos y acompañamiento.</p></div><div className="price"><small>US$</small>27,90</div><ul className="plan-list">{premium.map(x => <li key={x}><Check size={17}/>{x}</li>)}</ul><p className="plan-note">Si tienes dudas durante el proceso, podrás solicitar orientación personalizada por WhatsApp.</p><Button asChild className="plan-button purchase-pulse"><a href={CHECKOUT.premium}>QUIERO EL PREMIUM <ArrowRight size={17}/></a></Button></article>
     </div><div className="comparison"><h3>La diferencia, de un vistazo</h3><div><p><strong>Esencial</strong><span>Guía · Email · 7 días</span></p><p><strong>Premium</strong><span>Guía · Email · WhatsApp · Atención personalizada · Acompañamiento semanal · 50 ejercicios con banda · Yoga facial · 60 días</span></p></div></div></div></section>
 
     <section className="section testimonials"><div className="container"><p className="eyebrow">VOCES QUE TE ACOMPAÑAN</p><h2>Experiencias compartidas</h2><div className="testimonials-grid">{[

@@ -11,3 +11,4 @@
 
 - Keep the Olivia Grace storefront as a single index route with an Embla loop carousel; its sales narrative is one continuous page and Embla provides reliable touch/drag looping.
 - Keep uploaded ebook artwork in Lovable Assets pointer files rather than checked-in binaries; the original artwork stays unmodified and CDN-served.
+- Use Embla Auto Scroll with interaction resumption for the ebook carousel because it must move continuously while preserving manual drag and navigation.
