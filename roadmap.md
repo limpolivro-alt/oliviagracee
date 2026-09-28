@@ -1,8 +1,8 @@
 - [x] Construir página Olivia Grace com conteúdo, imagens originais, planos, popup e scripts.
 - [x] Verificar telas móveis, carrossel, popup e links de compra.
-- [ ] Centralizar conteúdo e reforçar responsividade móvel.
-- [ ] Adicionar cronômetro de topo com ocultação ao rolar.
-- [ ] Ajustar carrossel original para setas laterais e movimento contínuo.
-- [ ] Adicionar pulso suave aos botões de compra.
-- [ ] Criar bônus especiais com quatro imagens e valores.
-- [ ] Compactar planos e validar interações em 320–430 px.
+- [x] Centralizar conteúdo e reforçar responsividade móvel.
+- [x] Adicionar cronômetro de topo com ocultação ao rolar.
+- [x] Ajustar carrossel original para setas laterais e movimento contínuo.
+- [x] Adicionar pulso suave aos botões de compra.
+- [x] Criar bônus especiais com quatro imagens e valores.
+- [x] Compactar planos e validar interações em 320–430 px.
