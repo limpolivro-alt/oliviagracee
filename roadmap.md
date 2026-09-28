@@ -1,2 +1,2 @@
 - [x] Construir página Olivia Grace con conteúdo, imagens originais, planos, popup e scripts.
-- [ ] Verificar telas móveis, carrossel, popup e links de compra.
+- [x] Verificar telas móveis, carrossel, popup e links de compra.
