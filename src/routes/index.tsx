@@ -41,8 +41,26 @@ const bonuses = [
   { title: "Atención personalizada por WhatsApp", text: "Un canal adicional para recibir orientación durante tu proceso.", value: "US$98", image: bonusWhatsapp.url, alt: "Mujer recibiendo atención personalizada por mensajería" },
 ];
 
-const verifiedPurchases = ["María", "Laura", "Carolina"];
+const purchaseNames = [
+  "María", "Valentina", "Camila", "Sofía", "Lucía", "Isabella", "Martina", "Daniela",
+  "Paula", "Andrea", "Carolina", "Juliana", "Natalia", "Gabriela", "Valeria", "Fernanda",
+  "Renata", "Carla", "Mónica", "Beatriz", "Alejandra", "Verónica", "Claudia", "Adriana",
+  "Patricia", "Lorena", "Cecilia", "Diana", "Eva", "Rosa", "Elena", "Ana",
+  "Inés", "Sara", "Julia", "Noelia", "Raquel", "Silvia", "Teresa", "Gloria",
+  "Mariana", "Julieta", "Emilia", "Antonella", "Bianca", "Celeste", "Delfina", "Regina",
+];
 const notificationDelays = [3000, 7000, 10000];
+
+function shuffleNames(items: string[]): string[] {
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = copy[i]!;
+    copy[i] = copy[j]!;
+    copy[j] = temp;
+  }
+  return copy;
+}
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
@@ -88,24 +106,38 @@ function CountdownBar() {
 }
 
 function PurchaseActivity() {
-  const [purchaseIndex, setPurchaseIndex] = useState(-1);
+  const [name, setName] = useState("");
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    let current = 0;
+    let deck: string[] = shuffleNames(purchaseNames);
+    let lastShown = "";
     let showTimer: number | undefined;
     let hideTimer: number | undefined;
 
+    const nextName = () => {
+      if (deck.length === 0) {
+        deck = shuffleNames(purchaseNames);
+        const last = deck.at(-1);
+        if (last === lastShown) {
+          deck = [last ?? lastShown, ...deck.slice(0, deck.length - 1)];
+        }
+      }
+      const next = deck.pop()!;
+      lastShown = next;
+      return next;
+    };
+
     const schedule = () => {
+      const delay = notificationDelays[Math.floor(Math.random() * notificationDelays.length)];
       showTimer = window.setTimeout(() => {
-        setPurchaseIndex(current % verifiedPurchases.length);
+        setName(nextName());
         setVisible(true);
         hideTimer = window.setTimeout(() => {
           setVisible(false);
-          current += 1;
           schedule();
         }, 2800);
-      }, notificationDelays[current % notificationDelays.length]);
+      }, delay);
     };
 
     schedule();
@@ -115,10 +147,10 @@ function PurchaseActivity() {
     };
   }, []);
 
-  if (purchaseIndex < 0) return null;
+  if (!name) return null;
   return <div className={`purchase-activity${visible ? " is-visible" : ""}`} role="status" aria-live="polite">
     <span className="purchase-activity-icon"><Check size={14} /></span>
-    <span><strong>{verifiedPurchases[purchaseIndex]}</strong> acaba de comprar</span>
+    <span><strong>{name}</strong> acaba de comprar<span className="purchase-activity-note">Ejemplo</span></span>
   </div>;
 }
 
