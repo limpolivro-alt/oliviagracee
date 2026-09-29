@@ -14,8 +14,8 @@ import page6 from "@/assets/habitos-diarios.webp.asset.json";
 import page7 from "@/assets/apelo-final.webp.asset.json";
 import bonusBand from "@/assets/bonus-banda-elastica.jpg";
 import bonusYoga from "@/assets/bonus-yoga-facial.jpg";
-import bonusWeekly from "@/assets/bonus-acompanamiento-semanal.jpg";
-import bonusWhatsapp from "@/assets/bonus-whatsapp.jpg";
+import bonusWeekly from "@/assets/bonus-acompanamiento-semanal-nuevo.jpg.asset.json";
+import bonusWhatsapp from "@/assets/bonus-whatsapp-nuevo.jpg.asset.json";
 
 const CHECKOUT = {
   essential: "https://pay.hotmart.com/Y106555914B?off=fh9947dk&checkoutMode=10",
@@ -37,9 +37,12 @@ const excluded = ["Soporte por WhatsApp", "Atención personalizada por WhatsApp"
 const bonuses = [
   { title: "50 ejercicios con banda elástica", text: "Una colección adicional de ejercicios para complementar tu rutina.", value: "US$40", image: bonusBand, alt: "Mujer realizando ejercicios con una banda elástica" },
   { title: "Yoga facial", text: "Rutinas adicionales enfocadas en el cuidado y bienestar facial.", value: "US$27", image: bonusYoga, alt: "Mujer practicando una rutina de yoga facial" },
-  { title: "Acompañamiento semanal", text: "Orientación semanal para ayudarte a organizar tu proceso.", value: "US$140", image: bonusWeekly, alt: "Mujer organizando su rutina durante un acompañamiento semanal" },
-  { title: "Atención personalizada por WhatsApp", text: "Un canal adicional para recibir orientación durante tu proceso.", value: "US$98", image: bonusWhatsapp, alt: "Mujer recibiendo atención personalizada por mensajería" },
+  { title: "Acompañamiento semanal", text: "Orientación semanal para ayudarte a organizar tu proceso.", value: "US$140", image: bonusWeekly.url, alt: "Mujer organizando su rutina durante un acompañamiento semanal" },
+  { title: "Atención personalizada por WhatsApp", text: "Un canal adicional para recibir orientación durante tu proceso.", value: "US$98", image: bonusWhatsapp.url, alt: "Mujer recibiendo atención personalizada por mensajería" },
 ];
+
+const verifiedPurchases = ["María", "Laura", "Carolina"];
+const notificationDelays = [3000, 7000, 10000];
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
@@ -84,6 +87,41 @@ function CountdownBar() {
   </div>;
 }
 
+function PurchaseActivity() {
+  const [purchaseIndex, setPurchaseIndex] = useState(-1);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    let current = 0;
+    let showTimer: number | undefined;
+    let hideTimer: number | undefined;
+
+    const schedule = () => {
+      showTimer = window.setTimeout(() => {
+        setPurchaseIndex(current % verifiedPurchases.length);
+        setVisible(true);
+        hideTimer = window.setTimeout(() => {
+          setVisible(false);
+          current += 1;
+          schedule();
+        }, 2800);
+      }, notificationDelays[current % notificationDelays.length]);
+    };
+
+    schedule();
+    return () => {
+      if (showTimer !== undefined) window.clearTimeout(showTimer);
+      if (hideTimer !== undefined) window.clearTimeout(hideTimer);
+    };
+  }, []);
+
+  if (purchaseIndex < 0) return null;
+  return <div className={`purchase-activity${visible ? " is-visible" : ""}`} role="status" aria-live="polite">
+    <span className="purchase-activity-icon"><Check size={14} /></span>
+    <span><strong>{verifiedPurchases[purchaseIndex]}</strong> acaba de comprar</span>
+  </div>;
+}
+
 function PageCarousel() {
   const autoScroll = useRef(AutoScroll({ playOnInit: false, speed: 0.75, stopOnInteraction: false, stopOnMouseEnter: false }));
   const [viewportRef, embla] = useEmblaCarousel({ loop: true, align: "start", dragFree: true }, [autoScroll.current]);
@@ -119,7 +157,7 @@ function Index() {
     <CountdownBar />
     <header className="site-header"><a className="wordmark" href="#inicio" aria-label="Olivia Grace, inicio"><span className="brand-mark">OG</span><span>OLIVIA GRACE</span></a><a className="header-link" href="#planes">Ver planes <ArrowRight size={16}/></a></header>
     <section className="hero" id="inicio"><div className="hero-inner">
-      <div className="hero-copy"><p className="eyebrow">UNA GUÍA PARA VOLVER A TI</p><h1>Cómo Recuperar la Firmeza del Busto Después de la Lactancia</h1><p className="hero-sub">Una guía práctica para ayudarte a organizar ejercicios, cuidados y hábitos de bienestar después de la lactancia.</p></div>
+      <div className="hero-copy"><p className="eyebrow">UNA GUÍA PARA VOLVER A TI</p><h1>Descubre cómo recuperar la firmeza y cuidar tu busto después de la lactancia</h1><p className="hero-sub">Una guía práctica para ayudarte a organizar ejercicios, cuidados y hábitos de bienestar después de la lactancia.</p></div>
       <img className="hero-mockup" src={mockup.url} alt="Mockup original de la guía digital Olivia Grace en libro, tableta y celular" fetchPriority="high" />
       <div className="hero-action"><Button asChild size="lg" className="cta-button"><a href="#planes">QUIERO EMPEZAR A CUIDARME <ArrowRight size={18}/></a></Button><div className="micro-benefits"><span><Check/> Guía digital</span><span><Check/> Acceso desde tu celular</span><span><Check/> Plan práctico de 4 semanas</span></div></div>
     </div></section>
@@ -157,6 +195,7 @@ function Index() {
 
     <section className="final-cta"><div className="container"><p className="eyebrow">TU MOMENTO EMPIEZA AQUÍ</p><h2>Empieza a dedicarte un poco más de tiempo</h2><p>Una rutina sencilla puede ser un buen comienzo.</p><Button asChild size="lg" className="cta-button"><a href="#planes">QUIERO EMPEZAR <ArrowRight size={18}/></a></Button></div></section>
     <footer className="site-footer"><span className="wordmark"><span className="brand-mark">OG</span><span>OLIVIA GRACE</span></span><p>© 2026 Olivia Grace — Todos los derechos reservados.</p></footer>
+    <PurchaseActivity />
     {offerOpen && <div className="modal-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) setOfferOpen(false); }}><div className="offer-modal" role="dialog" aria-modal="true" aria-labelledby="offer-title"><Button variant="ghost" size="icon" className="modal-close" aria-label="Cerrar oferta" onClick={() => setOfferOpen(false)}><X size={20}/></Button><p className="eyebrow">SOLO POR ESTA OCASIÓN</p><h2 id="offer-title">Oferta especial</h2><p>Puedes llevar el Plan Premium por solo US$12.</p><div className="offer-price"><s>US$27,90</s><strong>US$12</strong></div><ul>{["WhatsApp", "Atención personalizada", "Acompañamiento semanal", "50 ejercicios con banda", "Yoga facial", "Garantía de 60 días"].map(x => <li key={x}><Check size={15}/>{x}</li>)}</ul><PlanLink href={CHECKOUT.offer}>QUIERO EL PREMIUM POR US$12</PlanLink><a className="decline" href={CHECKOUT.essential}>No, continuar con el Esencial</a></div></div>}
   </main>;
 }
