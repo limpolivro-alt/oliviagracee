@@ -119,7 +119,7 @@ function Index() {
     <CountdownBar />
     <header className="site-header"><a className="wordmark" href="#inicio" aria-label="Olivia Grace, inicio"><span className="brand-mark">OG</span><span>OLIVIA GRACE</span></a><a className="header-link" href="#planes">Ver planes <ArrowRight size={16}/></a></header>
     <section className="hero" id="inicio"><div className="hero-inner">
-      <div className="hero-copy"><p className="eyebrow">UNA GUÍA PARA VOLVER A TI</p><h1>¿Tu busto cambió después de la <em>lactancia?</em></h1><p className="hero-sub">Una guía práctica para ayudarte a organizar ejercicios, cuidados y hábitos de bienestar después de la lactancia.</p></div>
+      <div className="hero-copy"><p className="eyebrow">UNA GUÍA PARA VOLVER A TI</p><h1>Cómo Recuperar la Firmeza del Busto Después de la Lactancia</h1><p className="hero-sub">Una guía práctica para ayudarte a organizar ejercicios, cuidados y hábitos de bienestar después de la lactancia.</p></div>
       <img className="hero-mockup" src={mockup.url} alt="Mockup original de la guía digital Olivia Grace en libro, tableta y celular" fetchPriority="high" />
       <div className="hero-action"><Button asChild size="lg" className="cta-button"><a href="#planes">QUIERO EMPEZAR A CUIDARME <ArrowRight size={18}/></a></Button><div className="micro-benefits"><span><Check/> Guía digital</span><span><Check/> Acceso desde tu celular</span><span><Check/> Plan práctico de 4 semanas</span></div></div>
     </div></section>
