@@ -116,8 +116,9 @@ function PurchaseActivity() {
     const nextName = () => {
       if (deck.length === 0) {
         deck = shuffleNames(purchaseNames);
-        if (deck[deck.length - 1] === lastShown) {
-          [deck[0], deck[deck.length - 1]] = [deck[deck.length - 1], deck[0]];
+        const last = deck.at(-1);
+        if (last === lastShown) {
+          deck = [last ?? lastShown, ...deck.slice(0, deck.length - 1)];
         }
       }
       const next = deck.pop()!;
